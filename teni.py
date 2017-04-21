@@ -36,8 +36,8 @@ def drowplt(hist):
     #plt.yscale('log')
 
     plt.tight_layout()
+    plt.savefig("plt.png")
     plt.show()
-    return plt
 
 
 train_datagen = ImageDataGenerator(
@@ -71,7 +71,7 @@ model.add(Activation('relu'))
 model.add(MaxPooling2D((2,2)))
 model.add(BatchNormalization())
 
-model.add(Conv2D(32,3,3,init='he_normal'))
+model.add(Conv2D(64,3,3,init='he_normal'))
 model.add(Activation('relu'))
 model.add(MaxPooling2D((2,2)))
 model.add(BatchNormalization())
@@ -99,7 +99,7 @@ early_stop = EarlyStopping(patience=50)
 hist = model.fit_generator(
     train_generator,
     samples_per_epoch=2000,
-    nb_epoch=80,
+    nb_epoch=1,
     validation_data=validation_generator,
     nb_val_samples=800,
     callbacks=[tb_cb])
@@ -109,8 +109,7 @@ json_string = model.to_json()
 open('teni.json', 'w').write(json_string)
 model.save_weights('teni.h5')
 
-plt = drowplt(hist)
-plt.savefig("plt.png")
+drowplt(hist)
 with open('teni_log.txt','a') as f:
     f.write("'acc:'" + str(hist.history["acc"][-1]) + " 'loss':" + str(hist.history["loss"][-1]) + \
     " 'val_acc'" + str(hist.history["val_acc"][-1]) + " 'val_loss'" + str(hist.history["val_loss"][-1]) + "\n")
