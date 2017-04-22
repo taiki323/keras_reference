@@ -2,43 +2,10 @@ from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
 from keras.callbacks import TensorBoard
-from keras.models import model_from_json
-from keras.utils.visualize_util import plot
 from keras.callbacks import EarlyStopping
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
-import matplotlib.pyplot as plt
-from keras import backend as K
-import tensorflow as tf
 from keras.layers.normalization import BatchNormalization
-
-
-def drowplt(hist):
-    plt.subplot(2, 1, 1)
-    plt.plot(hist.history['loss'], linewidth=3, label='train')
-    plt.plot(hist.history['val_loss'], linewidth=3, label='valid')
-    plt.grid()
-    plt.legend()
-    plt.title("loss")
-    plt.xlabel('epoch')
-    plt.ylabel('loss')
-    # plt.ylim(1e-3, 1e-2)
-    #plt.yscale('log')
-
-    plt.subplot(2, 1, 2)
-    plt.plot(hist.history['acc'], linewidth=3, label='train')
-    plt.plot(hist.history['val_acc'], linewidth=3, label='valid')
-    plt.grid()
-    plt.legend()
-    plt.title("acc")
-    plt.xlabel('epoch')
-    plt.ylabel('acc')
-    # plt.ylim(1e-3, 1e-2)
-    #plt.yscale('log')
-
-    plt.tight_layout()
-    plt.savefig("plt.png")
-    plt.show()
-
+from keras_func import *
 
 train_datagen = ImageDataGenerator(
     rescale=1./255,
@@ -60,10 +27,7 @@ validation_generator = test_datagen.flow_from_directory(
     batch_size=32,
     class_mode='binary')
 
-config = tf.ConfigProto(allow_soft_placement=True)
-config.gpu_options.allow_growth = True
-session = tf.Session(config=config)
-K.set_session(session)
+tensormemory()
 
 model = Sequential()
 model.add(Conv2D(32, 3, 3, input_shape=(3, 150, 150),init='he_normal'))
@@ -104,12 +68,8 @@ hist = model.fit_generator(
     nb_val_samples=800,
     callbacks=[tb_cb])
 
-plot(model, to_file="model_teni.png", show_shapes=True)
-json_string = model.to_json()
-open('teni.json', 'w').write(json_string)
-model.save_weights('teni.h5')
-
-drowplt(hist)
+save_models(model,"teni")
+drowplt(hist, "test.jpg")
 with open('teni_log.txt','a') as f:
     f.write("'acc:'" + str(hist.history["acc"][-1]) + " 'loss':" + str(hist.history["loss"][-1]) + \
     " 'val_acc'" + str(hist.history["val_acc"][-1]) + " 'val_loss'" + str(hist.history["val_loss"][-1]) + "\n")
