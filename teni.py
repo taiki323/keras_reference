@@ -63,7 +63,7 @@ early_stop = EarlyStopping(patience=50)
 hist = model.fit_generator(
     train_generator,
     samples_per_epoch=2000,
-    nb_epoch=1,
+    nb_epoch=10,
     validation_data=validation_generator,
     nb_val_samples=800,
     callbacks=[tb_cb])
