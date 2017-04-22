@@ -12,8 +12,8 @@ def tensormemory():
 
 def drowplt(hist, filename):
     plt.subplot(2, 1, 1)
-    plt.plot(hist.history['loss'], linewidth=3, label='train')
-    plt.plot(hist.history['val_loss'], linewidth=3, label='valid')
+    plt.plot(hist.history['loss'], 'b-', marker='.', label='train')
+    plt.plot(hist.history['val_loss'], 'g-', marker='.', label='valid')
     plt.grid()
     plt.legend()
     plt.title("loss")
@@ -23,8 +23,8 @@ def drowplt(hist, filename):
     #plt.yscale('log')
 
     plt.subplot(2, 1, 2)
-    plt.plot(hist.history['acc'], linewidth=3, label='train')
-    plt.plot(hist.history['val_acc'], linewidth=3, label='valid')
+    plt.plot(hist.history['acc'], 'b-', marker='.', label='train')
+    plt.plot(hist.history['val_acc'], 'g-', marker='.', label='valid')
     plt.grid()
     plt.legend()
     plt.title("acc")

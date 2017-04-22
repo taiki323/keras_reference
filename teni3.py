@@ -91,7 +91,7 @@ def train_top_model():
                         nb_epoch=nb_epoch,
                         batch_size=32,
                         validation_data=(validation_data, validation_labels))
-
+    drowplt(history, "teni3.png")
     model.save_weights(os.path.join(result_dir, 'bottleneck_fc_model.h5'))
 
 
