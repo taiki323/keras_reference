@@ -90,7 +90,7 @@ def train_top_model():
     for i in range(0,1):
         model.compile(loss='binary_crossentropy',
                       #optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
-                      optimizer=optimizers.adam(),
+                      optimizer=optimizers.RMSprop(),
                       #optimizer=optimizers.SGD(lr=0.0002, momentum=0.9),
                       metrics=['accuracy'])
         early_stop = EarlyStopping(patience=20)
