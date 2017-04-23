@@ -89,8 +89,8 @@ def train_top_model():
     lrate = 0.0001
     for i in range(0,1):
         model.compile(loss='binary_crossentropy',
-                      optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
-                      #optimizer=optimizers.adam(lr=lrate),
+                      #optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
+                      optimizer=optimizers.adam(),
                       #optimizer=optimizers.SGD(lr=0.0002, momentum=0.9),
                       metrics=['accuracy'])
         early_stop = EarlyStopping(patience=20)
@@ -120,7 +120,7 @@ def train_top_model():
     result = model.predict_classes(bottleneck_features_test,batch_size=32)
     pred = result.reshape(400)
     count = Counter(pred == labels)
-    print count
+    print "\n" + str(count)
     print "acc:" + str(count[1]/400.0)
 
 
