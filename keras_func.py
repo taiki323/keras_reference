@@ -11,6 +11,7 @@ def tensormemory():
     K.set_session(session)
 
 def drowplt(hist, filename):
+    plt.figure()
     plt.subplot(2, 1, 1)
     plt.plot(hist.history['loss'], 'b-', marker='.', label='train')
     plt.plot(hist.history['val_loss'], 'g-', marker='.', label='valid')
@@ -35,7 +36,8 @@ def drowplt(hist, filename):
 
     plt.tight_layout()
     plt.savefig(filename)
-    plt.show()
+    return plt
+#    plt.show()
 
 def save_models(model, filename):
     plot(model, to_file=filename + "_structure.png", show_shapes=True)
