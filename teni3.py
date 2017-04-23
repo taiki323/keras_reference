@@ -5,6 +5,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Activation, Dropout, Flatten, Dense
 from keras import optimizers
+from keras.callbacks import EarlyStopping
 import numpy as np
 
 from keras_func import *
@@ -12,6 +13,7 @@ from keras_func import *
 img_width, img_height = 150, 150
 train_data_dir = 'data/train'
 validation_data_dir = 'data/validation'
+test_data_dir = 'data/test'
 nb_train_samples = 2000
 nb_validation_samples = 800
 nb_epoch = 50
@@ -41,7 +43,7 @@ def save_bottleneck_features():
         shuffle=False)
 
     # ジェネレータから生成される画像を入力し、VGG16の出力をファイルに保存
-    bottleneck_features_train = model.predict_generator(generator, nb_train_samples)
+    bottleneck_features_train = model.predict_generator(generator, 2000)
     np.save(os.path.join(result_dir, 'bottleneck_features_train.npy'),
             bottleneck_features_train)
 
@@ -54,7 +56,7 @@ def save_bottleneck_features():
         shuffle=False)
 
     # ジェネレータから生成される画像を入力し、VGG16の出力をファイルに保存
-    bottleneck_features_validation = model.predict_generator(generator, nb_validation_samples)
+    bottleneck_features_validation = model.predict_generator(generator, 800)
     np.save(os.path.join(result_dir, 'bottleneck_features_validation.npy'),
             bottleneck_features_validation)
 
@@ -64,14 +66,14 @@ def train_top_model():
     # 訓練データをロード
     # ジェネレータではshuffle=Falseなので最初の1000枚がcats、次の1000枚がdogs
     train_data = np.load(os.path.join(result_dir, 'bottleneck_features_train.npy'))
-    train_labels = np.array([0] * int(nb_train_samples / 2) + [1] * int(nb_train_samples / 2))
+    train_labels = np.array([0] * int(2000 / 2) + [1] * int(2000 / 2))
 
     # (2000, 4, 4, 512)
     print(train_data.shape)
 
     # バリデーションデータをロード
     validation_data = np.load(os.path.join(result_dir, 'bottleneck_features_validation.npy'))
-    validation_labels = np.array([0] * int(nb_validation_samples / 2) + [1] * int(nb_validation_samples / 2))
+    validation_labels = np.array([0] * int(800 / 2) + [1] * int(800 / 2))
 
     # (800, 4, 4, 512)
     print(validation_data.shape)
@@ -83,16 +85,39 @@ def train_top_model():
     model.add(Dropout(0.5))
     model.add(Dense(1, activation='sigmoid'))
 
-    model.compile(loss='binary_crossentropy',
-                  optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
-                  metrics=['accuracy'])
-
-    history = model.fit(train_data, train_labels,
-                        nb_epoch=nb_epoch,
-                        batch_size=32,
-                        validation_data=(validation_data, validation_labels))
-    drowplt(history, "teni3.png")
+    lrate = 0.0001
+    for i in range(0,1):
+        model.compile(loss='binary_crossentropy',
+                      optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
+                      #optimizer=optimizers.adam(lr=lrate),
+                      #optimizer=optimizers.SGD(lr=0.0002, momentum=0.9),
+                      metrics=['accuracy'])
+        early_stop = EarlyStopping(patience=20)
+        history = model.fit(train_data, train_labels,
+                            nb_epoch=50,
+                            batch_size=32,
+                            validation_data=(validation_data, validation_labels),
+                            callbacks=[early_stop]
+                            )
+        #drowplt(history, "figures/RMSprop_lr=" + str(lrate) + ".png")
+        drowplt(history, "figures/teni3.png")
+        lrate += 0.0001
+    save_history(history, "teni3_result.txt")
     model.save_weights(os.path.join(result_dir, 'bottleneck_fc_model.h5'))
+
+    datagen = ImageDataGenerator(rescale=1.0 / 255)
+    generator = datagen.flow_from_directory(
+        test_data_dir,
+        target_size=(img_width, img_height),
+        batch_size=32,
+        class_mode=None,
+        shuffle=False)
+    model1 = VGG16(include_top=False, weights='imagenet')
+    bottleneck_features_test = model1.predict_generator(generator, 400)
+    print bottleneck_features_test.shape
+    labels = np.array([0] * int(400 / 2) + [1] * int(400 / 2))
+    result = model.predict_classes(bottleneck_features_test,batch_size=32)
+    print result
 
 
 if __name__ == '__main__':
