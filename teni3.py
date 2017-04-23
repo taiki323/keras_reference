@@ -7,6 +7,7 @@ from keras.layers import Activation, Dropout, Flatten, Dense
 from keras import optimizers
 from keras.callbacks import EarlyStopping
 import numpy as np
+from collections import Counter
 
 from keras_func import *
 
@@ -117,7 +118,10 @@ def train_top_model():
     print bottleneck_features_test.shape
     labels = np.array([0] * int(400 / 2) + [1] * int(400 / 2))
     result = model.predict_classes(bottleneck_features_test,batch_size=32)
-    print result
+    pred = result.reshape(400)
+    count = Counter(pred == labels)
+    print count
+    print "acc:" + str(count[1]/400.0)
 
 
 if __name__ == '__main__':
